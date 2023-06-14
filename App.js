@@ -16,6 +16,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {Carrosel} from "./carrosel";
 import {db} from "./firebase";
 import {addDoc, collection, orderBy, onSnapshot, query} from "firebase/firestore";
+import { WebView } from 'react-native-webview';
+import YoutubePlayer from "react-native-youtube-iframe";
+
+
 
 function HomeScreen({ navigation }) {
 
@@ -167,47 +171,51 @@ function HomeScreen({ navigation }) {
 
 
 function NoticiaScreen({ navigation, route }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <ScrollView style={{ flex: 1 }}>
+        <Text style={styles.title}>{route.params.titulo}</Text>
 
+        <ImageBackground
+          source={{ uri: route.params.imagem }}
+          style={{ ...styles.image, height: 200 }}
+        ></ImageBackground>
 
-return (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={styles.conteudoContainer}>
+          {route.params.conteudo.split('<br>').map((paragraph, index) => {
+            if (paragraph.includes('[imagem:')) {
+              const start = paragraph.indexOf('[imagem:');
+              const end = paragraph.indexOf(']', start);
+              const imageUrl = paragraph.substring(start + 8, end);
 
-     <ScrollView
-     style={{flex: 1,}}
-    > 
-
-  <Text
-  style={styles.title}
-  >{route.params.titulo}</Text>
-
-    <ImageBackground
-        source={{
-          uri: route.params.imagem
-        }}
-        style={{...styles.image, height: 200,}}
-      >
-    
-
-
-        
-      </ImageBackground>
-
-      <View
-            style={styles.conteudoContainer}
-    
-          >
-          <Text
-            style={styles.conteudo}
-            >{route.params.conteudo}
-          </Text>
-    
-          </View>
-
-     </ScrollView>
- 
-  </View>
-);
+              return (
+                <View key={index}
+                style={styles.imageContainer}
+                >
+                  <Image
+                    source={{ uri: imageUrl }}
+                    style={styles.img}
+                  />
+                  <Text style={styles.conteudo}>
+                    {paragraph.substring(end + 1)}
+                  </Text>
+                </View>
+              );
+            } else {
+              return (
+                <Text key={index} style={styles.conteudo}>
+                  {paragraph}
+                </Text>
+              );
+            }
+          })}
+        </View>
+      </ScrollView>
+    </View>
+  );
 }
+
+
 
 const Stack = createNativeStackNavigator();
 
@@ -255,19 +263,32 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    padding: 10,
-    fontSize: 20,
+    padding: 15,
+    fontWeight: 'bold',
+    fontSize: 25,
   },
 
   conteudo: {
     padding: 20,
     fontSize: 15,
+      textAlign: 'justify',
+  lineHeight: 24,
 
   },
 
   conteudoContainer: {
     padding: 10,
-        lineHeight: 24,
+      lineHeight: 24,
 
-  }
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  
+  img:{
+    width: 100,
+    height: 100,
+    marginRight: 10,
+  },
 });
