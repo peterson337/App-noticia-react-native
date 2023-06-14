@@ -1,5 +1,5 @@
+import React, {useEffect, useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
-
 import { 
 StyleSheet,
 Text,
@@ -15,9 +15,25 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {Carrosel} from "./carrosel";
 import {db} from "./firebase";
-import {addDoc, collection} from "firebase/firestore";
+import {addDoc, collection, orderBy, onSnapshot, query} from "firebase/firestore";
 
 function HomeScreen({ navigation }) {
+
+  const [noticias, setarNoticias] = useState([])
+
+  useEffect(() => {
+    const q = query(collection(db, 'noticias'), orderBy('data', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setarNoticias(
+        snapshot.docs.map((doc) => ({
+          info: doc.data(),
+        }))
+      );
+    });
+
+    return () => unsubscribe();
+  }, []);
+  
 
   const image = {uri: 'https://reactjs.org/logo-og.png'};
 
@@ -35,37 +51,39 @@ function HomeScreen({ navigation }) {
   }}
     horizontal
     >
+         {
+  noticias.map((val, index) => {
+    if (index < 2) {
+      return (
+        <ImageBackground
+           key={val.info.titulo}
+          source={{
+            uri: val.info.imagem,
+          }}
+          style={styles.image}
+        >
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('Notícia', {
+                titulo: val.info.titulo,
+                conteudo: val.info.conteudo,
+                imagem:  val.info.imagem,
+              })
+            }
+            style={styles.gray}
+          ></TouchableOpacity>
 
-    <ImageBackground 
-    source={image}  
-    style={styles.image}>
+          <Text style={styles.text}>{val.info.titulo}</Text>
+        </ImageBackground>
+      );
+    }
 
-      <TouchableOpacity
-      onPress={() => navigation.navigate('Notícia', {
-        titulo: 'Um titulo de noticia',
-        conteudo: 'minha noticia de teste'
-      })}
-      style={styles.gray}
-      ></TouchableOpacity>
+    return null; // Adicionado um retorno nulo caso o índice seja maior que 1
+  })
 
-      <Text style={styles.text}>A minha notícia</Text>
+  
+}
 
-    </ImageBackground>
-
-
-
-
-    <ImageBackground 
-    source={image}  
-    style={styles.image}>
-
-      <TouchableOpacity
-      style={styles.gray}
-      ></TouchableOpacity>
-
-      <Text style={styles.text}>A minha notícia</Text>
-
-    </ImageBackground>
     </ScrollView>
 
   </View>
@@ -97,25 +115,48 @@ function HomeScreen({ navigation }) {
      contentContainerStyle={{padding: 20,}}
      style={{flex: 1,}}
      >
-      <View
-      style={{flexDirection: 'row', marginBottom: 10,}}
-      >
+     
+{
+  noticias.map((val, index) => {
+    if (index >= 2) {
+      return (
+        <View
+        key={val.info.data}
+        style={{flexDirection: 'row', marginBottom: 10,}}
+        >
+
           <TouchableOpacity
           style={{flexDirection: 'row',}}
           onPress={() => navigation.navigate('Notícia', {
-            titulo: 'Um titulo de noticia',
-            conteudo: 'minha noticia de teste'
+            titulo: val.info.titulo,
+            conteudo: val.info.conteudo,
+            imagem: val.info.imagem
+
           })}>
 
           <Image
-          source={image}
+          source={{
+            uri: val.info.imagem,
+          }}
           style={{width: 100, height: 100,}}
           />
           <Text
-          style={{padding: 10}}>Minha notícia de teste</Text>
+          style={{padding: 10}}>{val.info.titulo}</Text>
           </TouchableOpacity>
+        </View>
 
-      </View>
+      );
+    }else{
+    <View>Não tem nenhuma notícia</View>
+
+    }
+
+  })
+
+  
+}
+
+    
 
      </ScrollView>
 
@@ -126,13 +167,46 @@ function HomeScreen({ navigation }) {
 
 
 function NoticiaScreen({ navigation, route }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text>{route.params.titulo}</Text>
-        <Text>{route.params.conteudo}</Text>
 
-    </View>
-  );
+
+return (
+  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+
+     <ScrollView
+     style={{flex: 1,}}
+    > 
+
+  <Text
+  style={styles.title}
+  >{route.params.titulo}</Text>
+
+    <ImageBackground
+        source={{
+          uri: route.params.imagem
+        }}
+        style={{...styles.image, height: 200,}}
+      >
+    
+
+
+        
+      </ImageBackground>
+
+      <View
+            style={styles.conteudoContainer}
+    
+          >
+          <Text
+            style={styles.conteudo}
+            >{route.params.conteudo}
+          </Text>
+    
+          </View>
+
+     </ScrollView>
+ 
+  </View>
+);
 }
 
 const Stack = createNativeStackNavigator();
@@ -154,16 +228,18 @@ const styles = StyleSheet.create({
     flex: 0.3,
   },
   image: {
-    flex: 1, 
+    flex: 0.5, 
     resizeMode: 'cover',
     width: '100%',
   },
   text: {
     color: 'white',
-    fontSize: 29,
+    fontSize: 25,
     marginLeft: 10,
     position: 'absolute',
-    justifyContent: 'flex-end',
+    bottom:80, 
+    opacity: 0.4,
+
     /* 
     bottom:60, // Ajuste a posição vertical do texto conforme necessário
     left: 0, // Ajuste a posição horizontal do texto conforme necessário
@@ -177,4 +253,21 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
+
+  title: {
+    padding: 10,
+    fontSize: 20,
+  },
+
+  conteudo: {
+    padding: 20,
+    fontSize: 15,
+
+  },
+
+  conteudoContainer: {
+    padding: 10,
+        lineHeight: 24,
+
+  }
 });
