@@ -50,7 +50,7 @@ function HomeScreen({ navigation }) {
     <ScrollView 
     style={styles.container}
     contentContainerStyle={{
-    height: 250, 
+    height: 200, 
     width: '200%',
   }}
     horizontal
@@ -75,9 +75,11 @@ function HomeScreen({ navigation }) {
               })
             }
             style={styles.gray}
-          ></TouchableOpacity>
-
+          >
           <Text style={styles.text}>{val.info.titulo}</Text>
+
+          </TouchableOpacity>
+
         </ImageBackground>
       );
     }
@@ -145,7 +147,7 @@ function HomeScreen({ navigation }) {
           style={{width: 100, height: 100,}}
           />
           <Text
-          style={{padding: 10}}>{val.info.titulo}</Text>
+          style={{padding: 10, maxWidth: 209}}>{val.info.titulo}</Text>
           </TouchableOpacity>
         </View>
 
@@ -178,7 +180,7 @@ function NoticiaScreen({ navigation, route }) {
 
         <ImageBackground
           source={{ uri: route.params.imagem }}
-          style={{ ...styles.image, height: 200 }}
+          style={styles.backgroundImage}
         ></ImageBackground>
 
         <View style={styles.conteudoContainer}>
@@ -189,12 +191,10 @@ function NoticiaScreen({ navigation, route }) {
               const imageUrl = paragraph.substring(start + 8, end);
 
               return (
-                <View key={index}
-                style={styles.imageContainer}
-                >
+                <View key={index}>
                   <Image
                     source={{ uri: imageUrl }}
-                    style={styles.img}
+                    style={styles.contentImage}
                   />
                   <Text style={styles.conteudo}>
                     {paragraph.substring(end + 1)}
@@ -224,7 +224,7 @@ export default function App({ navigation }) {
   return (
     <NavigationContainer>
     <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen name="Portal" component={HomeScreen} />
+      <Stack.Screen name="Nerd news 🤓" component={HomeScreen}/>
       <Stack.Screen name="Notícia" component={NoticiaScreen} />
     </Stack.Navigator>
   </NavigationContainer>
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     flex: 0.3,
   },
   image: {
-    flex: 0.5, 
+    flex: 1, 
     resizeMode: 'cover',
     width: '100%',
   },
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginLeft: 10,
     position: 'absolute',
-    bottom:80, 
+    bottom:45, 
     opacity: 0.4,
 
     /* 
@@ -281,8 +281,16 @@ const styles = StyleSheet.create({
       lineHeight: 24,
 
   },
-  imageContainer: {
-    alignItems: 'center',
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    width: '100%',
+    height: 200,
+  },
+
+  contentImage: {
+    width: '100%',
+    height: 330,
     marginBottom: 10,
   },
   
