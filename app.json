@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "my-app11",
+    "name": "Nerd news",
     "slug": "my-app11",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,7 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.peterson16.myapp11"
     },
     "web": {
       "favicon": "./assets/favicon.png"
